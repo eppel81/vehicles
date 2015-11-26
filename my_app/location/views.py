@@ -3,7 +3,7 @@ from flask import jsonify, request, redirect, url_for, session, flash, render_te
 from my_app.location.models import Users, Objects, Providers, Settings, Location, Object2user
 from datetime import datetime, timedelta
 
-from my_app.location.forms import RegistrationForm, LoginForm, ManageUser, ChangePass
+from my_app.location.forms import RegistrationForm, LoginForm, ManageUser, ChangePass, UpdateSettings
 from flask import g
 from flask.ext.login import current_user, login_user, logout_user, login_required
 from my_app import login_manager
@@ -97,31 +97,17 @@ def logout():
 @login_required
 def index():
 
-    # here assoc object Object2user!
-    user_objects = [item.object for item in current_user.vehicles.all()]
+    # define amount of vehicles from DB table 'settings'
+    vehicles_amount = Settings.query.first().max_objects
 
     user_objects_full_attr = []
-    # for obj in user_objects:
-    #     res[obj.nid] = {
-    #         'id': obj.nid,
-    #         'name': obj.name
-    #     }
-    #
-    #     # last 24 hours
-    #     for loc in obj.locations.filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1))):
-    #     # for loc in obj.locations.all():
-    #         res[obj.nid][loc.nid] = {
-    #             'id': loc.nid,
-    #             'ts': str(loc.ts),
-    #             'latitude': str(loc.latitude),
-    #             'longitude': str(loc.longitude)
-    #         }
 
     # find vehicles, which have locations coords for last 24 hours
     user_objects = Objects.query.join(Location, Objects.nid == Location.object_id)\
         .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1)))\
         .join(Object2user, Objects.nid == Object2user.object_id)\
-        .join(Users, Object2user.user_id == Users.nid).filter(Users.nid == current_user.nid).limit(10).all()
+        .join(Users, Object2user.user_id == Users.nid).filter(Users.nid == current_user.nid)\
+        .order_by('nid').limit(vehicles_amount).all()
 
     for obj in user_objects:
         # from Object2user
@@ -233,11 +219,22 @@ def get_user_veh_locations():
     """
     Return vehicles locations
     """
+
+    # define amount of points from DB table 'settings'
+    points_amount = Settings.query.first().max_points
+
     user_vehicles = [item.object for item in current_user.vehicles.filter(Object2user.visible == True).all()]
+
+    user_vehicles = [item.object for item in current_user.vehicles.filter(Object2user.visible == True)
+        .join(Objects, Object2user.object_id == Objects.nid).join(Location, Objects.nid == Location.object_id)\
+        .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1))).order_by('object_id').all()]
+
     vehicles = []
     for item in user_vehicles:
         veh_locations = [dict(ts=str(loc.ts), latitude=str(loc.latitude),
-                              longitude=str(loc.longitude), other=loc.other) for loc in item.locations]
+                              longitude=str(loc.longitude), other=loc.other)
+                         for loc in item.locations.filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1)))
+                             .order_by('ts').limit(points_amount).all()]
         vehicles.append({
             'id': item.nid,
             'name': item.name,
@@ -260,7 +257,7 @@ def hide_show(vehicle):
 @login_required
 def change_password():
     """
-    Change password view
+    Change user's password view
     """
     form = ChangePass(request.form)
     if request.method == 'POST' and form.validate():
@@ -270,5 +267,34 @@ def change_password():
             current_user.change_password(new_password)
             db.session.add(current_user)
             db.session.commit()
+            flash('Your password successfully changed', 'success')
             return redirect(url_for('index'))
     return render_template('change_pass.html', form=form)
+
+
+@app.route('/change_settings', methods=['GET', 'POST'])
+def change_settings():
+    """
+    Change system settings
+    """
+    set_obj = Settings.query.first()
+
+    form = UpdateSettings(request.form)
+
+    form.name.data = str(set_obj.name)
+    form.description.data = str(set_obj.description)
+    form.max_objects.data = str(set_obj.max_objects)
+    form.max_points.data = str(set_obj.max_points)
+
+    if request.method == 'POST' and form.validate():
+        set_obj.name = request.form.get('name')
+        set_obj.description = request.form.get('description')
+        set_obj.max_objects = request.form.get('max_objects')
+        set_obj.max_points = request.form.get('max_points')
+
+        db.session.add(set_obj)
+        db.session.commit()
+        flash('Settings successfully changed', 'success')
+        return redirect('change_settings')
+
+    return render_template('change_settings.html', form=form)

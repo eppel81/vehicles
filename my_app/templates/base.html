@@ -25,7 +25,7 @@
                     {% if current_user.admin %}
                         <li><a href="{{ url_for('change_password') }}">Change my password</a></li>
                         <li><a href="{{ url_for('manage_user') }}">Manage users</a></li>
-                        <li><a href="#">Manage system</a></li>
+                        <li><a href="{{ url_for('change_settings') }}">Manage system</a></li>
                     {% endif %}
                     <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-user"></span> Logout</a></li>
                 {% endif %}
