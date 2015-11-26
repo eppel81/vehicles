@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block container %}
+    <h1>Welcome to the vehicle location system</h1>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="col-xs-3 left-col">
+                <h3 class="left-title">Your vehicles:</h3>
+                {% for item in vehicles %}
+                    <div class="col-xs-6" align="right">
+                        {{ item.name }}
+                    </div>
+                    <div class="col-xs-6" align="left">
+                        <a class="" href="{{ url_for('hide_show', vehicle=item.id) }}">
+                            {% if item.visible %}
+                                скрыть
+                            {% else %}
+                                отобразить
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-xs-9 right-col">
+                 <div id="map"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

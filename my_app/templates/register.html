@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block container %}
+    <div class="top-pad">
+        <div class="row">
+            <div class="col-xs-offset-2 col-xs-6">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><H2>Registration form</H2></div>
+                    <div class="panel-body">
+                        <form method="POST" action="{{ url_for('register') }}" class="form-horizontal" role="form">
+                            {{ form.csrf_token }}
+                            <div class="form-group">
+                                <label class="control-label col-xs-4" >{{ form.login.label }}</label>
+                                <div class="col-xs-8">{{ form.login(class="form-control") }}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4" >{{ form.name.label }}</label>
+                                <div class="col-xs-8">
+                                    {{ form.name(class="form-control") }}
+                                    {% for error in form.errors.name %}
+                                            <span style='color:red;'>[{{ error }}]</span><br />
+                                    {% endfor  %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4" >{{ form.password.label }}</label>
+                                <div class="col-xs-8">{{ form.password(class="form-control") }}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-4" >{{ form.confirm.label }}</label>
+                                <div class="col-xs-8">{{ form.confirm(class="form-control") }}</div>
+                            </div>
+                            <div class="col-xs-offset-4 col-xs-8">
+                                <div class="col-xs-offset-4 col-xs-8">
+                                    <button type="submit" class="btn btn-default">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

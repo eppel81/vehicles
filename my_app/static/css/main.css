@@ -1,0 +1,28 @@
+body {
+    padding-top: 50px;
+}
+
+.top-pad {
+    padding: 40px 15px;
+    /*text-align: center;*/
+}
+
+.centering{
+    text-align: center;
+}
+
+#map { height: 600px; }
+
+.left-title {
+    background-color: #337ab7;
+    border-color: #337ab7;
+    color: white;
+    text-align: center;
+    height: 30px;
+    margin: 0px 0px 10px 0px;
+}
+
+.right-col, .left-col {
+    height: 610px;
+    border: 1px solid #d5ecff;
+}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block container %}
+    <div class="row">
+        <h3>Select user for changing</h3><br/>
+        <div class="col-xs-4">
+            <select class="form-control" id="selectUser">
+                <option></option>
+                {% for user in users %}
+                    <option>{{ user.login }}</option>
+                {% endfor %}
+            </select>
+        </div>
+{#        <div class="col-xs-4">#}
+{#            <button class="btn btn-default" id="getUser"> Select user</button>#}
+{#        </div>#}
+    </div>
+    <div class="row">
+        <br/>
+        <div class="col-xs-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">Edit user</div>
+                <div class="panel-body">
+                    <form method="POST" action="{{ url_for('manage_user') }}" class="form-horizontal" role="form">
+                        {{ form.csrf_token }}
+{#                        <input type="hidden" name="user_id" value="" id="user_id">#}
+
+{#                        <div class="form-group">#}
+{#                            <label class="control-label col-xs-2" >{{ form.user_id.label }}</label>#}
+{#                            <div class="col-xs-8">#}
+                                {{ form.user_id(class="form-control", type='hidden') }}
+{#                            </div>#}
+{#                        </div>#}
+
+{# Login                       #}
+{#                        <div class="form-group">#}
+{#                            <label class="control-label col-xs-2" >{{ form.login.label }}</label>#}
+{#                            <div class="col-xs-8">#}
+{#                                {{ form.login(class="form-control") }}</div>#}
+{#                        </div>#}
+{# Password                       #}
+{#                        <div class="form-group">#}
+{#                            <label class="control-label col-xs-2" >{{ form.password.label }}</label>#}
+{#                            <div class="col-xs-8">#}
+{#                                {{ form.password(class="form-control") }}</div>#}
+{#                        </div>#}
+                        <div class="form-group">
+                            <label class="control-label col-xs-2" >{{ form.name.label }}</label>
+                            <div class="col-xs-8">
+                                {{ form.name(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-2" >{{ form.locked.label }}</label>
+                            <div class="col-xs-8">
+                                {{ form.locked(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-2" >{{ form.admin.label }}</label>
+                            <div class="col-xs-8">
+                                {{ form.admin(class="form-control") }}
+                            </div>
+                        </div>
+{# List of vehicles                       #}
+                        <div class="form-group">
+                            <div class="col-xs-8 col-xs-offset-2">
+                                <select id="vehicles_user" class="form-control" name="uservehicles"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-2" > </label>
+                            <div class="col-xs-4">
+                                <button type="submit" class="btn btn-default">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock container %}
