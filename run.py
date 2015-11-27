@@ -1,5 +1,8 @@
 # from my_app import app
-# app.run(debug=True)
+# if __name__ == '__main__':
+    # app.run()
+    # app.run(debug=True)
 
 from my_app import manager
-manager.run()
+if __name__ == '__main__':
+    manager.run()
