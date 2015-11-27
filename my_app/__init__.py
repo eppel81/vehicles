@@ -29,4 +29,4 @@ login_manager.login_view = 'login'
 
 import my_app.location.views
 
-# db.create_all()
+db.create_all()
