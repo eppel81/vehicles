@@ -104,10 +104,10 @@ def index():
 
     # find vehicles, which have locations coords for last 24 hours
     user_objects = Objects.query.join(Location, Objects.nid == Location.object_id)\
-        .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1)))\
+        .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-10)))\
         .join(Object2user, Objects.nid == Object2user.object_id)\
         .join(Users, Object2user.user_id == Users.nid).filter(Users.nid == current_user.nid)\
-        .order_by('nid').limit(vehicles_amount).all()
+        .order_by('nid').all()[:vehicles_amount]
 
     for obj in user_objects:
         # from Object2user
@@ -222,19 +222,27 @@ def get_user_veh_locations():
 
     # define amount of points from DB table 'settings'
     points_amount = Settings.query.first().max_points
+    vehicles_amount =  Settings.query.first().max_objects
 
-    user_vehicles = [item.object for item in current_user.vehicles.filter(Object2user.visible == True).all()]
 
-    user_vehicles = [item.object for item in current_user.vehicles.filter(Object2user.visible == True)
-        .join(Objects, Object2user.object_id == Objects.nid).join(Location, Objects.nid == Location.object_id)\
-        .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1))).order_by('object_id').all()]
+    # find vehicles, which have locations coords for last 24 hours
+    user_objects = Objects.query.join(Location, Objects.nid == Location.object_id)\
+        .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-10)))\
+        .join(Object2user, Objects.nid == Object2user.object_id).filter(Object2user.visible == True)\
+        .join(Users, Object2user.user_id == Users.nid).filter(Users.nid == current_user.nid)\
+        .order_by('nid').all()[:vehicles_amount]
+
+    # user_vehicles = [item.object for item in current_user.vehicles.filter(Object2user.visible == True)
+    #     .join(Objects, Object2user.object_id == Objects.nid).join(Location, Objects.nid == Location.object_id)\
+    #     .filter(Location.ts >= (datetime.utcnow()+timedelta(days=-10)))\
+    #     .order_by('object_id').all()]
 
     vehicles = []
-    for item in user_vehicles:
+    for item in user_objects:
         veh_locations = [dict(ts=str(loc.ts), latitude=str(loc.latitude),
                               longitude=str(loc.longitude), other=loc.other)
-                         for loc in item.locations.filter(Location.ts >= (datetime.utcnow()+timedelta(days=-1)))
-                             .order_by('ts').limit(points_amount).all()]
+                         for loc in item.locations.filter(Location.ts >= (datetime.utcnow()+timedelta(days=-10)))
+                             .order_by('ts').all()[:points_amount]]
         vehicles.append({
             'id': item.nid,
             'name': item.name,
@@ -298,3 +306,8 @@ def change_settings():
         return redirect('change_settings')
 
     return render_template('change_settings.html', form=form)
+
+
+@app.route('/get_report/<vehicle>')
+def get_report(vehicle):
+    pass

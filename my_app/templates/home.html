@@ -6,18 +6,24 @@
             <div class="col-xs-3 left-col">
                 <h3 class="left-title">Your vehicles:</h3>
                 {% for item in vehicles %}
-                    <div class="col-xs-6" align="right">
+                    <div class="col-xs-4" align="left">
                         {{ item.name }}
                     </div>
-                    <div class="col-xs-6" align="left">
+                    <div class="col-xs-5" align="left">
                         <a class="" href="{{ url_for('hide_show', vehicle=item.id) }}">
                             {% if item.visible %}
-                                скрыть
+                                <button type="button" class="btn btn-danger btn-xs">Скрыть</button>
                             {% else %}
-                                отобразить
+                                <button type="button" class="btn btn-success btn-xs">Отобразить</button>
                             {% endif %}
                         </a>
                     </div>
+                    <div class="col-xs-3">
+                        <a class="" href="{{ url_for('get_report', vehicle=item.id) }}">
+                            <button type="button" class="btn btn-info btn-xs">Отчет</button>
+                        </a>
+                    </div>
+                    <br /><br />
                 {% endfor %}
             </div>
             <div class="col-xs-9 right-col">
