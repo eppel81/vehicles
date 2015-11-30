@@ -26,3 +26,7 @@ body {
     height: 610px;
     border: 1px solid #d5ecff;
 }
+
+.report {
+    height: 25px;
+}

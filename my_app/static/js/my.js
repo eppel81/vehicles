@@ -54,4 +54,8 @@ $(function () {
         }
         return false;
     }
+
+    // Назначаем datepicker на странице отчетов
+    $( ".datepicker" ).datepicker({dateFormat: 'dd-mm-yy'});
+
 });

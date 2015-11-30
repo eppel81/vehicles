@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block container %}
+    <div class="top-pad">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h4>Select vehicle and period of time</h4></div>
+                    <div class="panel-body">
+                        <form method="POST" action="{{ url_for('get_report') }}" role="form">
+                            {{ form.csrf_token }}
+                            <div class="form-group">
+                                <div class="col-xs-2">
+                                    <lable for="vehicles">{{ form.vehicles.label }}</lable>
+                                    {{ form.vehicles(class="form-control") }}
+                                    {% for error in form.errors.vehicles %}
+                                            <span style='color:red;'>[{{ error }}]</span><br />
+                                    {% endfor  %}
+                                </div>
+                                <div class="col-xs-4">
+                                    <lable for="date_from">{{ form.date_from.label }}</lable>
+                                    {{ form.date_from(class="form-control datepicker") }}
+                                    {% for error in form.errors.date_from %}
+                                            <span style='color:red;'>[{{ error }}]</span><br />
+                                    {% endfor  %}
+                                </div>
+                                <div class="col-xs-4">
+                                    <lable for="date_to">{{ form.date_to.label }} (and including)</lable>
+                                    {{ form.date_to(class="form-control datepicker") }}
+                                    {% for error in form.errors.date_to %}
+                                            <span style='color:red;'>[{{ error }}]</span><br />
+                                    {% endfor  %}
+                                </div>
+
+                                {# Button                              #}
+                                <div class="col-xs-2">
+                                    <br />
+                                    <button type="submit" class="btn btn-primary pull-right" style="margin-top: 5px;">
+                                        Show results
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {# Results               #}
+                {% if report_data %}
+                    <br/>
+                    <h3>Report for the selected time period:</h3>
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <th>Time</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Other info</th>
+                        </tr>
+                        {% for item in report_data %}
+                            <tr>
+                                <td>{{ momentjs(item.ts).format('DD-MM-YYYY HH:mm:ss') }}</td>
+                                <td>{{ item.latitude }}</td>
+                                <td>{{ item.longitude }}</td>
+                                <td>{% if item.other %}{{ item.other }}{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

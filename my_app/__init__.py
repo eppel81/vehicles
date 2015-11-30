@@ -3,6 +3,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand, Migrate
+from location.momentjs import momentjs
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -26,6 +27,10 @@ app.secret_key = 'some_random_key jkljlkjsdfewef123'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+app.jinja_env.globals['momentjs'] = momentjs
+
 
 import my_app.location.views
 

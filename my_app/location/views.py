@@ -3,11 +3,13 @@ from flask import jsonify, request, redirect, url_for, session, flash, render_te
 from my_app.location.models import Users, Objects, Providers, Settings, Location, Object2user
 from datetime import datetime, timedelta
 
-from my_app.location.forms import RegistrationForm, LoginForm, ManageUser, ChangePass, UpdateSettings
+from my_app.location.forms import RegistrationForm, LoginForm, ManageUser, ChangePass, UpdateSettings, ReportVehicle
 from flask import g
 from flask.ext.login import current_user, login_user, logout_user, login_required
 from my_app import login_manager
 from werkzeug.security import generate_password_hash
+import pytz
+from decorators import admin_required
 
 
 
@@ -70,9 +72,9 @@ def login():
 
         login_user(existing_user)
         # for update field 'lastlogin'
-        # existing_user.lastlogin = datetime.now()
-        # db.session.add(existing_user)
-        # db.session.commit()
+        existing_user.lastlogin = datetime.utcnow().replace(tzinfo=pytz.UTC)
+        db.session.add(existing_user)
+        db.session.commit()
 
         flash('You have successfully logged in.', 'success')
         return redirect(url_for('index'))
@@ -136,6 +138,7 @@ def is_in_list(obj, objlist):
 # for managing users
 @app.route('/manage_users', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def manage_user():
     users = Users.query.order_by('login').all()
 
@@ -217,7 +220,7 @@ def get_users():
 @login_required
 def get_user_veh_locations():
     """
-    Return vehicles locations
+    Return vehicles locations. Request by getJSON from jQuery
     """
 
     # define amount of points from DB table 'settings'
@@ -254,6 +257,9 @@ def get_user_veh_locations():
 @app.route('/hide_show/<vehicle>')
 @login_required
 def hide_show(vehicle):
+    """
+    Hide or show vehicles on map
+    """
     obj = Objects.query.get(int(vehicle))
     current_user.hide_show_vehicle(obj)
     db.session.add(current_user)
@@ -281,6 +287,8 @@ def change_password():
 
 
 @app.route('/change_settings', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def change_settings():
     """
     Change system settings
@@ -308,6 +316,31 @@ def change_settings():
     return render_template('change_settings.html', form=form)
 
 
-@app.route('/get_report/<vehicle>')
-def get_report(vehicle):
-    pass
+@app.route('/get_report/<vehicle>', methods=['GET', 'POST'])
+@app.route('/get_report', methods=['GET', 'POST'])
+def get_report(vehicle=0):
+    """
+    Reports for vehicles. If vehicle==-1 then don't mark select list item by 'selected'
+    """
+    form = ReportVehicle(request.form)
+    vehicles_for_select = [(item.nid, item.name) for item in [item.object for item in current_user.vehicles.all()]]
+    form.vehicles.choices = vehicles_for_select
+
+    # # set default selection if param vehicle is setted
+    if vehicle > 0:
+        form.vehicles.default = vehicle
+        form.process()
+
+    report_data = []
+    if request.method == 'POST' and form.validate():
+        dt_from = datetime.strptime(request.form.get('date_from'), '%d-%m-%Y')
+        # take next day to "dt_to" for query
+        dt_to = datetime.strptime(request.form.get('date_to'), '%d-%m-%Y') + timedelta(days=1)
+
+        obj = Objects.query.get(request.form.get('vehicles'))
+        report_data = obj.locations.filter(Location.ts >= dt_from, Location.ts < dt_to).order_by('ts').all()
+
+        if not report_data:
+            flash('There is no data for the selected time period.', 'warning')
+
+    return render_template('report_vehicles.html', form=form, report_data=report_data)

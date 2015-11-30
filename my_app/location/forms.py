@@ -1,6 +1,8 @@
 from wtforms import Form, StringField, PasswordField, BooleanField, IntegerField, \
-    SelectMultipleField, SelectField
+    SelectMultipleField, SelectField, DateField, DateTimeField
 from wtforms.validators import InputRequired, EqualTo
+from datetime import datetime
+
 
 class RegistrationForm(Form):
     login = StringField('Login', [InputRequired()])
@@ -15,6 +17,9 @@ class LoginForm(Form):
 
 
 class ManageUser(Form):
+    """
+    Form for manage user's parameters
+    """
     user_id = IntegerField('User ID')
     login = StringField('Login')
     password = PasswordField('Password')
@@ -31,7 +36,22 @@ class ChangePass(Form):
 
 
 class UpdateSettings(Form):
+    """
+    Form for manage system parameters
+    """
     name = StringField('Configuration name')
     description = StringField('Description')
     max_objects = IntegerField('Max vehicles on map')
     max_points = IntegerField('Max points on map')
+
+
+class ReportVehicle(Form):
+    """
+    Form for selection vehicle and show report for period for time
+    """
+    vehicles = SelectField('Vehicles', [InputRequired()], coerce=int)
+    # date_from = DateTimeField('Date from', [InputRequired()], format='%d-%m-%Y %H:%M:%S')
+    # date_to = DateTimeField('Date to', [InputRequired()], format='%d-%m-%Y %H:%M:%S')
+    date_from = DateField('Date from', [InputRequired()], format='%d-%m-%Y', default=datetime.today)
+    date_to = DateField('Date to', [InputRequired()], format='%d-%m-%Y', default=datetime.today)
+
